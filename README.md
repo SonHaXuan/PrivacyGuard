@@ -1,10 +1,10 @@
 # privacy-policy-tree
 To install dependencies:
-npm install
+```npm install```
 
 Build project
-npm run build
+```npm run build```
 
 Run project at local
-npm run dev
+```npm run dev```
 
