@@ -11,7 +11,8 @@ async function main() {
   await createPrivacyPolicy();
   // data test
   await insertTestData();
-  return; // xoa khi chay xong 2 function tren
+  // return; // xoa khi chay xong 2 function tren
+  console.time("running time");
   const app = await Models.App.findOne();
   const user = await Models.User.findOne();
   const userId = user.id.toString();
@@ -46,6 +47,8 @@ async function main() {
       result: isAccepted ? "grant" : " deny",
     });
   }
+
+  console.timeEnd("running time");
 }
 
 async function createPrivacyPolicy() {
@@ -107,23 +110,36 @@ async function insertTestData() {
   await Models.User.deleteMany({});
   await Models.App.deleteMany({});
 
+  const privacyPolicy = await Models.PrivacyPolicy.findOne({});
+
+  const Moverment = privacyPolicy.attributes.find(
+    (item) => item.name === "Moverment"
+  );
+  const Height = privacyPolicy.attributes.find(
+    (item) => item.name === "Height"
+  );
+
+  const TPostal = privacyPolicy.purposes.find(
+    (item) => item.name === "TPostal"
+  );
+  const TEMail = privacyPolicy.purposes.find((item) => item.name === "TEMail");
   await Models.User.create({
     privacyPreference: {
-      attributes: ["6066cba21e18af2e25175a3b"], // Moverment
-      exceptions: ["6066cba21e18af2e25175a3c"], // Height
-      denyAttributes: ["6066cba21e18af2e25175a3c"], // Height
-      allowedPurposes: ["6066cba21e18af2e25175a54"], // TPostal
-      prohibitedPurposes: ["6066cba21e18af2e25175a53"], // TEMail
-      denyPurposes: ["6066cba21e18af2e25175a53"], // TEMail
+      attributes: [Moverment.id], // Moverment
+      exceptions: [Height.id], // Height
+      denyAttributes: [Height.id], // Height
+
+      allowedPurposes: [TPostal.id], // TPostal
+      prohibitedPurposes: [TEMail.id], // TEMail
+      denyPurposes: [TEMail.id], // TEMail
       timeofRetention: 1000, // second
     },
   });
 
   await Models.App.create({
     name: "App 1",
-    attributes: ["6066cba21e18af2e25175a3b"], // Moverment
-    purposes: ["6066cba21e18af2e25175a54"], // TPostal,
+    attributes: [Moverment.id], // Moverment
+    purposes: [TPostal.id], // TPostal,
     timeofRetention: 500,
   });
 }
-// test();

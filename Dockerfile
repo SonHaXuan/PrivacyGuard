@@ -1,4 +1,4 @@
-FROM registry.scontain.com:5050/sconecuratedimages/apps:node-10.14-alpine
+FROM node:10.14-alpine
 ENV SCONE_HEAP=1G
 ENV SCONE_FORK=1
 WORKDIR /app
