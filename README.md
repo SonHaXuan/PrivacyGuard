@@ -1,4 +1,4 @@
-# Privacy Compliance Execution for Fog Computing
+# PrivacyGuard
 
 A **privacy compliance evaluation system** for fog computing environments that validates whether applications comply with user privacy preferences. Features hash-based edge caching, nested set model for hierarchical policies, and comprehensive security evaluation.
 
