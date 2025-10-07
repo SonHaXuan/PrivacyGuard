@@ -1,4 +1,4 @@
-import Models from "../models";
+import Models from "../models/index.js";
 import mongoose from "mongoose";
 import chalk from "chalk";
 const evaluate = async (

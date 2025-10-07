@@ -1,7 +1,7 @@
-import appModel from "./app";
-import userModel from "./user.model";
-import evaluateHashModel from "./evaluate-hash.model";
-import privacyPolicyModel from "./privacy-policy.model";
+import appModel from "./app.js";
+import userModel from "./user.model.js";
+import evaluateHashModel from "./evaluate-hash.model.js";
+import privacyPolicyModel from "./privacy-policy.model.js";
 class Model {
   constructor() {
     this.App = appModel;

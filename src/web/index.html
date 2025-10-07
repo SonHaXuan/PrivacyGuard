@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Preference Configuration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .section-description {
+            color: #666;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .hierarchy-tree {
+            background: #f7f9fc;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .tree-node {
+            margin-bottom: 10px;
+        }
+
+        .tree-node label {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .tree-node label:hover {
+            background: #e8f0fe;
+        }
+
+        .tree-node input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .tree-node.level-0 {
+            font-weight: bold;
+            margin-left: 0;
+        }
+
+        .tree-node.level-1 {
+            margin-left: 20px;
+            font-weight: 600;
+        }
+
+        .tree-node.level-2 {
+            margin-left: 40px;
+        }
+
+        .tree-node.level-3 {
+            margin-left: 60px;
+            font-size: 14px;
+        }
+
+        .preference-type {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .preference-card {
+            background: white;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .preference-card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        .preference-card.allow {
+            border-color: #4caf50;
+        }
+
+        .preference-card.except {
+            border-color: #ff9800;
+        }
+
+        .preference-card.deny {
+            border-color: #f44336;
+        }
+
+        .retention-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .retention-input input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e8ed;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .retention-input label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-success {
+            background: #4caf50;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e8ed;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Privacy Preference Configuration</h1>
+            <p>Configure your privacy preferences for healthcare IoT data sharing</p>
+        </header>
+
+        <div class="content">
+            <!-- Stats Section -->
+            <div class="section">
+                <h2>System Statistics</h2>
+                <div class="stats" id="stats">
+                    <div class="stat-card">
+                        <div class="value" id="stat-users">-</div>
+                        <div class="label">Users</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="stat-apps">-</div>
+                        <div class="label">Apps</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="value" id="stat-cache">-</div>
+                        <div class="label">Cache Entries</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Information -->
+            <div class="section">
+                <h2>User Information</h2>
+                <div class="retention-input">
+                    <label for="userName">Full Name:</label>
+                    <input type="text" id="userName" placeholder="Enter your name">
+                </div>
+            </div>
+
+            <!-- Attributes Preferences -->
+            <div class="section">
+                <h2>Data Attributes Preferences</h2>
+                <p class="section-description">
+                    Select which personal data attributes you allow, have exceptions for, or completely deny.
+                </p>
+
+                <div class="preference-type">
+                    <div class="preference-card allow">
+                        <h3>✓ Allow Attributes</h3>
+                        <div id="allowAttributes" class="hierarchy-tree"></div>
+                    </div>
+                    <div class="preference-card except">
+                        <h3>⚠ Exception Attributes</h3>
+                        <div id="exceptAttributes" class="hierarchy-tree"></div>
+                    </div>
+                    <div class="preference-card deny">
+                        <h3>✗ Deny Attributes</h3>
+                        <div id="denyAttributes" class="hierarchy-tree"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purposes Preferences -->
+            <div class="section">
+                <h2>Data Usage Purposes Preferences</h2>
+                <p class="section-description">
+                    Select which purposes you allow, have exceptions for, or completely deny for your data.
+                </p>
+
+                <div class="preference-type">
+                    <div class="preference-card allow">
+                        <h3>✓ Allowed Purposes</h3>
+                        <div id="allowPurposes" class="hierarchy-tree"></div>
+                    </div>
+                    <div class="preference-card except">
+                        <h3>⚠ Prohibited Purposes</h3>
+                        <div id="exceptPurposes" class="hierarchy-tree"></div>
+                    </div>
+                    <div class="preference-card deny">
+                        <h3>✗ Deny Purposes</h3>
+                        <div id="denyPurposes" class="hierarchy-tree"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Time of Retention -->
+            <div class="section">
+                <h2>Time of Retention</h2>
+                <p class="section-description">
+                    Maximum time (in seconds) that applications can retain your data.
+                </p>
+                <div class="retention-input">
+                    <label for="retention">Retention Time:</label>
+                    <input type="number" id="retention" value="1000" min="1">
+                    <span>seconds</span>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <div>
+                    <button class="btn btn-success" onclick="savePreferences()">Save Preferences</button>
+                    <button class="btn btn-secondary" onclick="loadStats()">Refresh Stats</button>
+                </div>
+                <button class="btn" onclick="testEvaluation()">Test Evaluation</button>
+            </div>
+
+            <!-- Result Display -->
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let policyData = null;
+
+        // Load privacy policy and initialize UI
+        async function initUI() {
+            try {
+                const response = await fetch(`${API_URL}/policy`);
+                policyData = await response.json();
+
+                renderHierarchy('allowAttributes', policyData.attributes);
+                renderHierarchy('exceptAttributes', policyData.attributes);
+                renderHierarchy('denyAttributes', policyData.attributes);
+
+                renderHierarchy('allowPurposes', policyData.purposes);
+                renderHierarchy('exceptPurposes', policyData.purposes);
+                renderHierarchy('denyPurposes', policyData.purposes);
+
+                loadStats();
+            } catch (error) {
+                showResult('Failed to load privacy policy: ' + error.message, 'error');
+            }
+        }
+
+        // Calculate hierarchy level based on left/right values
+        function getLevel(node, allNodes) {
+            let level = 0;
+            for (const n of allNodes) {
+                if (n.left < node.left && n.right > node.right) {
+                    level++;
+                }
+            }
+            return level;
+        }
+
+        // Render hierarchical checkboxes
+        function renderHierarchy(containerId, nodes) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+
+            // Skip root "General" node
+            const filteredNodes = nodes.filter(n => n.left > 1);
+
+            filteredNodes.forEach(node => {
+                const level = getLevel(node, nodes);
+                const div = document.createElement('div');
+                div.className = `tree-node level-${level}`;
+
+                const label = document.createElement('label');
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = node._id;
+                checkbox.dataset.name = node.name;
+
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(node.name));
+                div.appendChild(label);
+                container.appendChild(div);
+            });
+        }
+
+        // Get selected node IDs from container
+        function getSelectedNodes(containerId) {
+            const container = document.getElementById(containerId);
+            const checkboxes = container.querySelectorAll('input[type="checkbox"]:checked');
+            return Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        // Load system statistics
+        async function loadStats() {
+            try {
+                const [usersRes, appsRes, cacheRes] = await Promise.all([
+                    fetch(`${API_URL}/users`),
+                    fetch(`${API_URL}/apps`),
+                    fetch(`${API_URL}/cache/stats`)
+                ]);
+
+                const users = await usersRes.json();
+                const apps = await appsRes.json();
+                const cache = await cacheRes.json();
+
+                document.getElementById('stat-users').textContent = users.total || 0;
+                document.getElementById('stat-apps').textContent = apps.total || 0;
+                document.getElementById('stat-cache').textContent = cache.totalEntries || 0;
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+        }
+
+        // Save user preferences
+        async function savePreferences() {
+            try {
+                const userName = document.getElementById('userName').value || 'Anonymous User';
+                const retention = parseInt(document.getElementById('retention').value);
+
+                const privacyPreference = {
+                    attributes: getSelectedNodes('allowAttributes'),
+                    exceptions: getSelectedNodes('exceptAttributes'),
+                    denyAttributes: getSelectedNodes('denyAttributes'),
+                    allowedPurposes: getSelectedNodes('allowPurposes'),
+                    prohibitedPurposes: getSelectedNodes('exceptPurposes'),
+                    denyPurposes: getSelectedNodes('denyPurposes'),
+                    timeofRetention: retention
+                };
+
+                const response = await fetch(`${API_URL}/users`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        fullName: userName,
+                        privacyPreference
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showResult(`Preferences saved successfully! User ID: ${result._id}`, 'success');
+                    loadStats();
+                } else {
+                    showResult(`Failed to save: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showResult('Error saving preferences: ' + error.message, 'error');
+            }
+        }
+
+        // Test evaluation with current preferences
+        async function testEvaluation() {
+            try {
+                // Get first user and app for testing
+                const [usersRes, appsRes] = await Promise.all([
+                    fetch(`${API_URL}/users?limit=1`),
+                    fetch(`${API_URL}/apps?limit=1`)
+                ]);
+
+                const users = await usersRes.json();
+                const apps = await appsRes.json();
+
+                if (!users.users || users.users.length === 0) {
+                    showResult('No users found. Please save preferences first.', 'error');
+                    return;
+                }
+
+                if (!apps.apps || apps.apps.length === 0) {
+                    showResult('No apps found in database.', 'error');
+                    return;
+                }
+
+                const response = await fetch(`${API_URL}/evaluate`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userId: users.users[0]._id,
+                        appId: apps.apps[0]._id
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    const icon = result.result === 'grant' ? '✓' : '✗';
+                    const type = result.result === 'grant' ? 'success' : 'error';
+                    showResult(
+                        `${icon} Evaluation Result: ${result.result.toUpperCase()} | ` +
+                        `Latency: ${result.latencyMs}ms | ` +
+                        `Cache Hit: ${result.cacheHit ? 'Yes' : 'No'}`,
+                        type
+                    );
+                } else {
+                    showResult(`Evaluation failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                showResult('Error during evaluation: ' + error.message, 'error');
+            }
+        }
+
+        // Show result message
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('result');
+            resultDiv.textContent = message;
+            resultDiv.className = `result ${type}`;
+            resultDiv.style.display = 'block';
+
+            setTimeout(() => {
+                resultDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', initUI);
+    </script>
+</body>
+</html>

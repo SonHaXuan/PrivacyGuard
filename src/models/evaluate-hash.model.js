@@ -1,6 +1,6 @@
-var mongoose = require("mongoose");
-var Schema = mongoose.Schema;
-var findOrCreate = require("mongoose-findorcreate");
+import mongoose from "mongoose";
+const Schema = mongoose.Schema;
+import findOrCreate from "mongoose-findorcreate";
 
 var schema = new Schema(
   {

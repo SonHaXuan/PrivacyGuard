@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:5.0
+    container_name: privacy-db
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=privacy-policy
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - privacy-network
+    restart: unless-stopped
+
+  # Privacy Validator Service - Instance 1
+  privacy-validator-1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: privacy-validator-1
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URL=mongodb://mongodb:27017/privacy-policy
+      - SERVICE_ID=validator-1
+      - PORT=3001
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongodb
+    networks:
+      - privacy-network
+    restart: unless-stopped
+
+  # Privacy Validator Service - Instance 2
+  privacy-validator-2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: privacy-validator-2
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URL=mongodb://mongodb:27017/privacy-policy
+      - SERVICE_ID=validator-2
+      - PORT=3002
+    ports:
+      - "3002:3002"
+    depends_on:
+      - mongodb
+    networks:
+      - privacy-network
+    restart: unless-stopped
+
+  # Privacy Validator Service - Instance 3
+  privacy-validator-3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: privacy-validator-3
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URL=mongodb://mongodb:27017/privacy-policy
+      - SERVICE_ID=validator-3
+      - PORT=3003
+    ports:
+      - "3003:3003"
+    depends_on:
+      - mongodb
+    networks:
+      - privacy-network
+    restart: unless-stopped
+
+  # Nginx Load Balancer
+  load-balancer:
+    image: nginx:alpine
+    container_name: privacy-load-balancer
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - privacy-validator-1
+      - privacy-validator-2
+      - privacy-validator-3
+    networks:
+      - privacy-network
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+
+networks:
+  privacy-network:
+    driver: bridge

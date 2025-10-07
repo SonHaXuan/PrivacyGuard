@@ -1,6 +1,7 @@
 {
   "name": "privacy-policy-tree",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "main": "server.js",
   "scripts": {
@@ -10,24 +11,31 @@
     "build-babel": "babel src -s -d dist",
     "build": "npm run clean && npm run build-babel",
     "start": "npm run build && node dist/index.js",
-    "dev": "babel-watch src/index.js"
+    "dev": "babel-watch src/index.js",
+    "api": "babel-watch src/api/server.js",
+    "benchmark": "babel-watch src/benchmarks/run-all-benchmarks.js",
+    "comparative": "babel-watch src/baselines/comparative-benchmark.js",
+    "fog-benchmark": "babel-watch src/benchmarks/fog-layer-benchmark.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.12.2",
     "chalk": "^4.1.0",
+    "cors": "^2.8.5",
     "dotenv": "^8.2.0",
+    "express": "^4.21.2",
     "md5": "^2.3.0",
     "moment": "^2.29.1",
     "mongoose": "^5.11.8",
     "mongoose-findorcreate": "^3.0.0"
   },
   "devDependencies": {
-    "@babel/polyfill": "^7.12.1",
     "@babel/cli": "^7.12.10",
     "@babel/core": "^7.12.10",
     "@babel/plugin-transform-runtime": "^7.12.10",
+    "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.12.11",
     "babel-watch": "^7.0.0",
     "eslint": "^7.16.0",

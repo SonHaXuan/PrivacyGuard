@@ -7,9 +7,8 @@ var _mongoose = _interopRequireDefault(require("mongoose"));
 require("dotenv").config();
 
 var MONGODB_URL = process.env.MONGODB_URL;
-console.log(1, MONGODB_URL);
 
-_mongoose["default"].connect("mongodb://db:27017/privacy-policy", {
+_mongoose["default"].connect(MONGODB_URL, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 });
