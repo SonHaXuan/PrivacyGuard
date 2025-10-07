@@ -180,16 +180,6 @@ docker-compose up -d db
 
 ISC
 
-## Citation
-
-If you use this system in your research, please cite:
-
-```
-PrivacyGuard: Privacy Compliance Execution for Fog Computing
-Hash-based Edge Caching with Nested Set Model
-2025
-```
-
 ## Contact
 
 For questions or collaboration, please open an issue on GitHub.
