@@ -185,7 +185,7 @@ ISC
 If you use this system in your research, please cite:
 
 ```
-Privacy Compliance Execution for Fog Computing
+PrivacyGuard: Privacy Compliance Execution for Fog Computing
 Hash-based Edge Caching with Nested Set Model
 2025
 ```
