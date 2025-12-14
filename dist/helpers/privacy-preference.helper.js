@@ -13,7 +13,7 @@ var _slicedToArray2 = _interopRequireDefault(require("@babel/runtime/helpers/sli
 
 var _asyncToGenerator2 = _interopRequireDefault(require("@babel/runtime/helpers/asyncToGenerator"));
 
-var _models = _interopRequireDefault(require("../models"));
+var _index = _interopRequireDefault(require("../models/index.js"));
 
 var _mongoose = _interopRequireDefault(require("mongoose"));
 
@@ -147,7 +147,7 @@ var evaluateAttributeType = /*#__PURE__*/function () {
 
             appAttributeId = appAttributes[i];
             _context3.next = 16;
-            return _models["default"].PrivacyPolicy.aggregate([{
+            return _index["default"].PrivacyPolicy.aggregate([{
               $unwind: "$attributes"
             }, {
               $match: {
@@ -169,7 +169,7 @@ var evaluateAttributeType = /*#__PURE__*/function () {
             // get attribute
             appAttribute = appAttribute[0].attributes;
             _context3.next = 22;
-            return _models["default"].PrivacyPolicy.findOne({
+            return _index["default"].PrivacyPolicy.findOne({
               attributes: {
                 $elemMatch: {
                   _id: {
@@ -298,7 +298,7 @@ var evaluatePurposesType = /*#__PURE__*/function () {
 
             appPurposeId = appPurposes[i];
             _context5.next = 15;
-            return _models["default"].PrivacyPolicy.aggregate([{
+            return _index["default"].PrivacyPolicy.aggregate([{
               $unwind: "$purposes"
             }, {
               $match: {
@@ -320,7 +320,7 @@ var evaluatePurposesType = /*#__PURE__*/function () {
             // get purpose
             appPurpose = appPurpose[0].purposes;
             _context5.next = 21;
-            return _models["default"].PrivacyPolicy.findOne({
+            return _index["default"].PrivacyPolicy.findOne({
               purposes: {
                 $elemMatch: {
                   _id: {

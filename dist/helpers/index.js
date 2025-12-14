@@ -7,10 +7,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
-var _privacyPreference = _interopRequireDefault(require("./privacy-preference.helper"));
+var _privacyPreferenceHelper = _interopRequireDefault(require("./privacy-preference.helper.js"));
 
 var _default = {
-  PrivacyPreference: _privacyPreference["default"]
+  PrivacyPreference: _privacyPreferenceHelper["default"]
 };
 exports["default"] = _default;
 //# sourceMappingURL=index.js.map

@@ -10,7 +10,7 @@ import cors from "cors";
 import "../services/mongoose.js";
 import Models from "../models/index.js";
 import Helpers from "../helpers/index.js";
-import md5 from "md5";
+import { computeCacheKey } from "../utils/hashUtils.js";
 import moment from "moment";
 
 const app = express();
@@ -89,10 +89,8 @@ app.post("/api/evaluate", async (req, res) => {
 
     const startTime = process.hrtime.bigint();
 
-    // Check cache
-    const hashValue = md5(
-      md5(JSON.stringify(app)) + "-" + md5(JSON.stringify(user.privacyPreference))
-    );
+    // Check cache (using SHA-256)
+    const hashValue = computeCacheKey(app, user.privacyPreference);
 
     const cachedResult = await Models.EvaluateHash.findOne({
       userId: user.id.toString(),

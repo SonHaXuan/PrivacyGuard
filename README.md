@@ -4,7 +4,7 @@ A **privacy compliance evaluation system** for fog computing environments that v
 
 ## Key Features
 
-- **Hash-based Edge Caching**: MD5 cache with TTL for ultra-low latency (2.36 ms)
+- **Hash-based Edge Caching**: SHA-256 cache with TTL for ultra-low latency (2.36 ms)
 - **Nested Set Model**: Efficient hierarchical attribute/purpose queries
 - **Fog Computing Architecture**: IoT → Edge → Fog → Cloud (4-tier)
 - **Security**: MITM attack resistance, cache poisoning prevention
@@ -71,7 +71,7 @@ npx babel-watch src/benchmarks/mitm-attack-simulation.js
 
 ### Security (MITM Resistance)
 - **Request Tampering**: ✅ PROTECTED (hash integrity)
-- **Cache Poisoning**: ✅ PROTECTED (0/1000 collisions)
+- **Cache Poisoning**: ✅ PROTECTED (0/1000 collisions, 2^256 hash space)
 - **Replay Attack**: ✅ PROTECTED (TTL + hash invalidation)
 - **Success Rate**: 91.7% (11/12 tests passed)
 
@@ -130,7 +130,7 @@ src/
 
 - **Backend**: Node.js, Express.js, Babel
 - **Database**: MongoDB with Mongoose
-- **Caching**: MD5 hash-based with TTL
+- **Caching**: SHA-256 hash-based with TTL (2^256 hash space, NIST recommended)
 - **Data Model**: Nested Set Model for hierarchical queries
 - **Load Balancing**: Nginx (for horizontal scaling)
 - **Containerization**: Docker Compose

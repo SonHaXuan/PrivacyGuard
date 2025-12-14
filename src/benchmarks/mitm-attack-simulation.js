@@ -1,13 +1,14 @@
 /**
  * MITM (Man-in-the-Middle) Attack Simulation
  * Tests system resilience against request tampering, cache poisoning, and integrity violations
+ * Uses SHA-256 for secure cache key generation (2^256 hash space)
  */
 
 require('dotenv').config();
 import '../services/mongoose';
 import Models from '../models';
 import Helpers from '../helpers';
-import md5 from 'md5';
+import { sha256, computeCacheKey } from '../utils/hashUtils.js';
 import chalk from 'chalk';
 
 const printSection = (title) => {
@@ -40,15 +41,13 @@ const testRequestTampering = async () => {
       throw new Error('Test data not available');
     }
 
-    // Calculate legitimate hash
-    const legitimateHash = md5(
-      md5(JSON.stringify(app)) + '-' + md5(JSON.stringify(user.privacyPreference))
-    );
+    // Calculate legitimate hash (SHA-256)
+    const legitimateHash = computeCacheKey(app, user.privacyPreference);
 
     console.log(chalk.blue('Legitimate request:'));
     console.log(`  App ID: ${app._id}`);
     console.log(`  User ID: ${user._id}`);
-    console.log(`  Hash: ${legitimateHash}`);
+    console.log(`  Hash (SHA-256): ${legitimateHash}`);
 
     // ATTACKER ACTION: Modify app attributes in transit
     const tamperedApp = { ...app.toObject() };
@@ -61,9 +60,7 @@ const testRequestTampering = async () => {
     console.log(`  Modified purposes: ${JSON.stringify(tamperedApp.purposes)}`);
 
     // Calculate tampered hash (what attacker might compute)
-    const tamperedHash = md5(
-      md5(JSON.stringify(tamperedApp)) + '-' + md5(JSON.stringify(user.privacyPreference))
-    );
+    const tamperedHash = computeCacheKey(tamperedApp, user.privacyPreference);
 
     console.log(`  Tampered Hash: ${tamperedHash}`);
 
@@ -102,8 +99,7 @@ const testRequestTampering = async () => {
     printResult(
       'Tampered Data Detection',
       resultsDiffer,
-      `Legitimate: ${legitimateResult}, Tampered: ${tamperedResult} - ${
-        resultsDiffer ? 'Results differ (PROTECTED)' : 'Results same (RISK!)'
+      `Legitimate: ${legitimateResult}, Tampered: ${tamperedResult} - ${resultsDiffer ? 'Results differ (PROTECTED)' : 'Results same (RISK!)'
       }`
     );
 
@@ -129,8 +125,8 @@ const testCachePoisoning = async () => {
     const app = await Models.App.findOne();
     const user = await Models.User.findOne();
 
-    // ATTACKER ACTION: Craft malicious cache entry
-    const maliciousHash = md5('MALICIOUS_PAYLOAD_' + Date.now());
+    // ATTACKER ACTION: Craft malicious cache entry (using SHA-256)
+    const maliciousHash = sha256('MALICIOUS_PAYLOAD_' + Date.now());
 
     console.log(chalk.red('Attacker attempts to inject cache entry:'));
     console.log(`  Malicious Hash: ${maliciousHash}`);
@@ -145,10 +141,8 @@ const testCachePoisoning = async () => {
 
     console.log(chalk.yellow('Malicious cache entry injected!'));
 
-    // DEFENSE TEST: Query with legitimate request
-    const legitimateHash = md5(
-      md5(JSON.stringify(app)) + '-' + md5(JSON.stringify(user.privacyPreference))
-    );
+    // DEFENSE TEST: Query with legitimate request (SHA-256)
+    const legitimateHash = computeCacheKey(app, user.privacyPreference);
 
     const cachedResult = await Models.EvaluateHash.findOne({
       userId: user._id.toString(),
@@ -168,14 +162,14 @@ const testCachePoisoning = async () => {
       `Legitimate requests use hash ${legitimateHash}, not affected by malicious ${maliciousHash}`
     );
 
-    // DEFENSE TEST: Can attacker guess the hash?
+    // DEFENSE TEST: Can attacker guess the hash? (SHA-256: 2^256 hash space)
     const randomGuesses = 1000;
     let successfulGuesses = 0;
 
-    console.log(chalk.blue(`\nTesting hash guessing (${randomGuesses} attempts)...`));
+    console.log(chalk.blue(`\nTesting hash guessing (${randomGuesses} attempts, SHA-256 2^256 space)...`));
 
     for (let i = 0; i < randomGuesses; i++) {
-      const guessedHash = md5('guess_' + i);
+      const guessedHash = sha256('guess_' + i);
       const found = await Models.EvaluateHash.findOne({
         hash: guessedHash,
       });
@@ -185,10 +179,9 @@ const testCachePoisoning = async () => {
     const hashSpaceProtection = successfulGuesses === 0;
 
     printResult(
-      'Hash Collision Resistance',
+      'Hash Collision Resistance (SHA-256)',
       hashSpaceProtection,
-      `${successfulGuesses}/${randomGuesses} guesses matched (${
-        hashSpaceProtection ? 'PROTECTED' : 'VULNERABLE'
+      `${successfulGuesses}/${randomGuesses} guesses matched (${hashSpaceProtection ? 'PROTECTED' : 'VULNERABLE'
       })`
     );
 
@@ -229,15 +222,11 @@ const testResponseModification = async () => {
     console.log(chalk.red('\nAttacker modifies response:'));
     console.log(`  Modified Result: ${modifiedResult ? 'grant' : 'deny'}`);
 
-    // DEFENSE TEST: Hash verification on client side
-    const serverHash = md5(
-      md5(JSON.stringify(app)) + '-' + md5(JSON.stringify(user.privacyPreference))
-    );
+    // DEFENSE TEST: Hash verification on client side (SHA-256)
+    const serverHash = computeCacheKey(app, user.privacyPreference);
 
-    // Client recomputes hash
-    const clientHash = md5(
-      md5(JSON.stringify(app)) + '-' + md5(JSON.stringify(user.privacyPreference))
-    );
+    // Client recomputes hash (SHA-256)
+    const clientHash = computeCacheKey(app, user.privacyPreference);
 
     const hashVerificationWorks = serverHash === clientHash;
 
@@ -276,6 +265,9 @@ const testResponseModification = async () => {
     console.log(
       chalk.gray('   Response should include: HMAC-SHA256(result + timestamp + serverKey)')
     );
+    console.log(
+      chalk.green('   ✓ Already using SHA-256 for cache keys (2^256 hash space)')
+    );
 
     return {
       hashVerificationAvailable: hashVerificationWorks,
@@ -299,14 +291,12 @@ const testReplayAttack = async () => {
     const app = await Models.App.findOne();
     const user = await Models.User.findOne();
 
-    // Initial evaluation
-    const initialHash = md5(
-      md5(JSON.stringify(app)) + '-' + md5(JSON.stringify(user.privacyPreference))
-    );
+    // Initial evaluation (SHA-256)
+    const initialHash = computeCacheKey(app, user.privacyPreference);
     const initialResult = await Helpers.PrivacyPreference.evaluate(app, user);
 
     console.log(chalk.blue('Initial evaluation:'));
-    console.log(`  Hash: ${initialHash}`);
+    console.log(`  Hash (SHA-256): ${initialHash}`);
     console.log(`  Result: ${initialResult ? 'grant' : 'deny'}`);
 
     // Create cache entry
@@ -323,7 +313,7 @@ const testReplayAttack = async () => {
     const modifiedPreferences = { ...user.privacyPreference };
     modifiedPreferences.timeofRetention = 0; // Stricter policy
 
-    const newHash = md5(md5(JSON.stringify(app)) + '-' + md5(JSON.stringify(modifiedPreferences)));
+    const newHash = computeCacheKey(app, modifiedPreferences);
 
     console.log(`  New Hash: ${newHash}`);
     console.log(chalk.red('Attacker replays old hash: ') + initialHash);
@@ -440,16 +430,18 @@ const runMITMSimulation = async () => {
       results.attack4.replayPrevented ? chalk.green('PROTECTED') : chalk.red('VULNERABLE')
     );
 
-    // Export results
-    console.log(chalk.blue('\nExporting results to: results/mitm-attack-evaluation.json'));
+    // Export results to SHA-256 results folder
+    console.log(chalk.blue('\nExporting results to: results-sha256/mitm-attack-evaluation.json'));
     const fs = require('fs');
-    const resultsPath = './results/mitm-attack-evaluation.json';
+    const resultsPath = './results-sha256/mitm-attack-evaluation.json';
 
     fs.writeFileSync(
       resultsPath,
       JSON.stringify(
         {
           timestamp: new Date().toISOString(),
+          hashAlgorithm: 'SHA-256',
+          hashSpace: '2^256',
           summary: {
             totalTests,
             passedTests,

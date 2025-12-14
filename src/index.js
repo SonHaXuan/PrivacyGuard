@@ -2,7 +2,7 @@ require("dotenv").config();
 import "./services/mongoose";
 import Models from "./models";
 import Helpers from "./helpers";
-import md5 from "md5";
+import { computeCacheKey } from "./utils/hashUtils.js";
 import moment from "moment";
 
 main();
@@ -16,10 +16,8 @@ async function main() {
   const app = await Models.App.findOne();
   const user = await Models.User.findOne();
   const userId = user.id.toString();
-  // // check hash
-  const hashValue = md5(
-    md5(JSON.stringify(app)) + "-" + md5(JSON.stringify(user.privacyPreference))
-  );
+  // // check hash (using SHA-256)
+  const hashValue = computeCacheKey(app, user.privacyPreference);
 
   const permission = await Models.EvaluateHash.findOne({
     userId,

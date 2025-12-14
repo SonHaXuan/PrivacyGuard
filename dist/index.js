@@ -12,7 +12,7 @@ var _models = _interopRequireDefault(require("./models"));
 
 var _helpers = _interopRequireDefault(require("./helpers"));
 
-var _md = _interopRequireDefault(require("md5"));
+var _hashUtils = require("./utils/hashUtils.js");
 
 var _moment = _interopRequireDefault(require("moment"));
 
@@ -39,7 +39,10 @@ function _main() {
             return insertTestData();
 
           case 4:
-            return _context.abrupt("return");
+            // return; // xoa khi chay xong 2 function tren
+            console.time("running time");
+            _context.next = 7;
+            return _models["default"].App.findOne();
 
           case 7:
             app = _context.sent;
@@ -48,9 +51,9 @@ function _main() {
 
           case 10:
             user = _context.sent;
-            userId = user.id.toString(); // // check hash
+            userId = user.id.toString(); // // check hash (using SHA-256)
 
-            hashValue = (0, _md["default"])((0, _md["default"])(JSON.stringify(app)) + "-" + (0, _md["default"])(JSON.stringify(user.privacyPreference)));
+            hashValue = (0, _hashUtils.computeCacheKey)(app, user.privacyPreference);
             _context.next = 15;
             return _models["default"].EvaluateHash.findOne({
               userId: userId,
@@ -93,6 +96,9 @@ function _main() {
             });
 
           case 26:
+            console.timeEnd("running time");
+
+          case 27:
           case "end":
             return _context.stop();
         }
@@ -273,11 +279,11 @@ function _createPrivacyPolicy() {
 
 function insertTestData() {
   return _insertTestData.apply(this, arguments);
-} // test();
-
+}
 
 function _insertTestData() {
   _insertTestData = (0, _asyncToGenerator2["default"])( /*#__PURE__*/_regenerator["default"].mark(function _callee3() {
+    var privacyPolicy, Moverment, Height, TPostal, TEMail;
     return _regenerator["default"].wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -295,37 +301,54 @@ function _insertTestData() {
 
           case 6:
             _context3.next = 8;
+            return _models["default"].PrivacyPolicy.findOne({});
+
+          case 8:
+            privacyPolicy = _context3.sent;
+            Moverment = privacyPolicy.attributes.find(function (item) {
+              return item.name === "Moverment";
+            });
+            Height = privacyPolicy.attributes.find(function (item) {
+              return item.name === "Height";
+            });
+            TPostal = privacyPolicy.purposes.find(function (item) {
+              return item.name === "TPostal";
+            });
+            TEMail = privacyPolicy.purposes.find(function (item) {
+              return item.name === "TEMail";
+            });
+            _context3.next = 15;
             return _models["default"].User.create({
               privacyPreference: {
-                attributes: ["6066cba21e18af2e25175a3b"],
+                attributes: [Moverment.id],
                 // Moverment
-                exceptions: ["6066cba21e18af2e25175a3c"],
+                exceptions: [Height.id],
                 // Height
-                denyAttributes: ["6066cba21e18af2e25175a3c"],
+                denyAttributes: [Height.id],
                 // Height
-                allowedPurposes: ["6066cba21e18af2e25175a54"],
+                allowedPurposes: [TPostal.id],
                 // TPostal
-                prohibitedPurposes: ["6066cba21e18af2e25175a53"],
+                prohibitedPurposes: [TEMail.id],
                 // TEMail
-                denyPurposes: ["6066cba21e18af2e25175a53"],
+                denyPurposes: [TEMail.id],
                 // TEMail
                 timeofRetention: 1000 // second
 
               }
             });
 
-          case 8:
-            _context3.next = 10;
+          case 15:
+            _context3.next = 17;
             return _models["default"].App.create({
               name: "App 1",
-              attributes: ["6066cba21e18af2e25175a3b"],
+              attributes: [Moverment.id],
               // Moverment
-              purposes: ["6066cba21e18af2e25175a54"],
+              purposes: [TPostal.id],
               // TPostal,
               timeofRetention: 500
             });
 
-          case 10:
+          case 17:
           case "end":
             return _context3.stop();
         }

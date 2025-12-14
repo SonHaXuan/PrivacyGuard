@@ -5,7 +5,7 @@
 
 import Models from "../models";
 import Helpers from "../helpers";
-import md5 from "md5";
+import { sha256, computeCacheKey } from "../utils/hashUtils.js";
 import moment from "moment";
 
 /**
@@ -18,9 +18,7 @@ export async function measureCacheHit(app, user) {
   const startTime = process.hrtime.bigint();
 
   const userId = user.id.toString();
-  const hashValue = md5(
-    md5(JSON.stringify(app)) + "-" + md5(JSON.stringify(user.privacyPreference))
-  );
+  const hashValue = computeCacheKey(app, user.privacyPreference);
 
   const permission = await Models.EvaluateHash.findOne({
     userId,
@@ -71,7 +69,7 @@ export async function measureCacheMiss(app, user) {
 }
 
 /**
- * Measure hash computation overhead
+ * Measure hash computation overhead (SHA-256)
  * @param {Object} app - Application data
  * @param {Object} user - User privacy preferences
  * @returns {Object} - Hash computation time
@@ -79,16 +77,14 @@ export async function measureCacheMiss(app, user) {
 export function measureHashComputation(app, user) {
   const startTime = process.hrtime.bigint();
 
-  const hashValue = md5(
-    md5(JSON.stringify(app)) + "-" + md5(JSON.stringify(user.privacyPreference))
-  );
+  const hashValue = computeCacheKey(app, user.privacyPreference);
 
   const endTime = process.hrtime.bigint();
   const latencyNs = Number(endTime - startTime);
   const latencyMs = latencyNs / 1_000_000;
 
   return {
-    type: "hash_computation",
+    type: "hash_computation_sha256",
     latencyMs,
     latencyNs,
     hashValue,
@@ -164,11 +160,9 @@ export async function runLatencyBenchmark(iterations = 100) {
     nestedSetQuery: [],
   };
 
-  // Warm-up: create cache entry
+  // Warm-up: create cache entry (using SHA-256)
   const userId = user.id.toString();
-  const hashValue = md5(
-    md5(JSON.stringify(app)) + "-" + md5(JSON.stringify(user.privacyPreference))
-  );
+  const hashValue = computeCacheKey(app, user.privacyPreference);
 
   await Models.EvaluateHash.findOneAndUpdate(
     { userId, hash: hashValue },

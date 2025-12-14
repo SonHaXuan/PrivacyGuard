@@ -5,7 +5,7 @@
 
 import Models from "../models";
 import Helpers from "../helpers";
-import md5 from "md5";
+import { computeCacheKey } from "../utils/hashUtils.js";
 import moment from "moment";
 
 /**
@@ -18,9 +18,7 @@ async function processEvaluationRequest(app, user) {
   const startTime = process.hrtime.bigint();
 
   const userId = user.id.toString();
-  const hashValue = md5(
-    md5(JSON.stringify(app)) + "-" + md5(JSON.stringify(user.privacyPreference))
-  );
+  const hashValue = computeCacheKey(app, user.privacyPreference);
 
   // Check cache
   const permission = await Models.EvaluateHash.findOne({

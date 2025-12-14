@@ -1,16 +1,17 @@
 "use strict";
 
+var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
 
-var mongoose = require("mongoose");
+var _mongoose = _interopRequireDefault(require("mongoose"));
 
-var Schema = mongoose.Schema;
+var _mongooseFindorcreate = _interopRequireDefault(require("mongoose-findorcreate"));
 
-var findOrCreate = require("mongoose-findorcreate");
-
+var Schema = _mongoose["default"].Schema;
 var schema = new Schema({
   userId: Schema.Types.ObjectId,
   hash: String,
@@ -21,9 +22,9 @@ var schema = new Schema({
     virtuals: true
   }
 });
-schema.plugin(findOrCreate);
+schema.plugin(_mongooseFindorcreate["default"]);
 
-var _default = mongoose.model("evaluateHash", schema);
+var _default = _mongoose["default"].model("evaluateHash", schema);
 
 exports["default"] = _default;
 //# sourceMappingURL=evaluate-hash.model.js.map

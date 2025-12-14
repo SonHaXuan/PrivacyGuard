@@ -2,9 +2,11 @@
 
 var _interopRequireDefault = require("@babel/runtime/helpers/interopRequireDefault");
 
+var _dotenv = _interopRequireDefault(require("dotenv"));
+
 var _mongoose = _interopRequireDefault(require("mongoose"));
 
-require("dotenv").config();
+_dotenv["default"].config();
 
 var MONGODB_URL = process.env.MONGODB_URL;
 

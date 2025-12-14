@@ -7,7 +7,7 @@ require("dotenv").config();
 import "../services/mongoose";
 import Models from "../models";
 import Helpers from "../helpers";
-import md5 from "md5";
+import { computeCacheKey } from "../utils/hashUtils.js";
 import moment from "moment";
 import NoCacheBaseline from "./no-cache";
 import FlatHierarchyBaseline from "./flat-hierarchy";
@@ -15,6 +15,7 @@ import MetricsCollector from "../metrics/collector";
 
 /**
  * Evaluate using proposed approach (with cache + nested set)
+ * Uses SHA-256 for secure cache key generation
  * @param {Object} app - Application data
  * @param {Object} user - User privacy preferences
  * @returns {Promise<Object>} - Evaluation result
@@ -23,9 +24,7 @@ async function evaluateProposed(app, user) {
   const startTime = process.hrtime.bigint();
 
   const userId = user.id.toString();
-  const hashValue = md5(
-    md5(JSON.stringify(app)) + "-" + md5(JSON.stringify(user.privacyPreference))
-  );
+  const hashValue = computeCacheKey(app, user.privacyPreference);
 
   // Check cache
   const permission = await Models.EvaluateHash.findOne({
